@@ -1,0 +1,163 @@
+#VRML_OBJ R2022a utf8
+Robot {
+  translation 3.90082 1.59658 0
+  rotation 0 0 1 -1.1415953071795863
+  children [
+    DEF left_gps GPS {
+      translation 0.25 0 0.1
+      name "left_gps"
+    }
+    DEF right_gps GPS {
+      translation -0.25 0 0.1
+      name "right_gps"
+    }
+    Lidar {
+      translation 0 -0.15 0.5
+      rotation 0 0 1 -1.57
+      horizontalResolution 128
+      fieldOfView 3.14
+      numberOfLayers 1
+      maxRange 2
+    }
+    DEF Body Transform {
+      translation 0 0 0.3
+      children [
+        Shape {
+          appearance PBRAppearance {
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.4
+            radius 0.25
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor 0.25 0 0.1
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.25 0 0.1
+        rotation -1.5215778498271807e-18 -0.9999999999999999 1.5215762984038997e-18 1.5707953071795862
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.05
+              radius 0.1
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF Wheel_physics Physics {
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor -0.25 0 0.1
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.25 0 0.1
+        rotation -2.738105111438825e-18 -0.9999999999999999 2.738102319626355e-18 1.5707953071795862
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.05
+              radius 0.1
+            }
+          }
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics DEF Wheel_physics Physics {
+        }
+      }
+    }
+    BallJoint {
+      jointParameters BallJointParameters {
+        anchor 0 -0.2 0.05
+      }
+      jointParameters2 JointParameters {
+      }
+      jointParameters3 JointParameters {
+        axis 0 1 0
+      }
+      endPoint Solid {
+        translation 0 -0.2 0.05
+        rotation 0.386920360078701 -0.6341064033154971 -0.6694786809382751 3.1919086661498626
+        children [
+          DEF ball_wheel Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Sphere {
+              radius 0.05
+            }
+          }
+        ]
+        name "solid(2)"
+        boundingObject USE ball_wheel
+        physics Physics {
+        }
+      }
+    }
+    BallJoint {
+      jointParameters BallJointParameters {
+        anchor 0 0.2 0.05
+      }
+      jointParameters2 JointParameters {
+      }
+      jointParameters3 JointParameters {
+        axis 0 1 0
+      }
+      endPoint Solid {
+        translation 0 0.2 0.05
+        rotation 0 1 0 0
+        children [
+          DEF ball_wheel Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Sphere {
+              radius 0.05
+            }
+          }
+        ]
+        name "solid(3)"
+        boundingObject USE ball_wheel
+        physics Physics {
+        }
+      }
+    }
+  ]
+  boundingObject USE Body
+  physics Physics {
+  }
+  controller "drive_my_robot"
+}
