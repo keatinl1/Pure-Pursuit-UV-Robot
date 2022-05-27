@@ -65,3 +65,5 @@ while x_pos ~= x_goal && y_pos ~= y_goal
                0 0 0  ;
                0 0 0 ];
 end
+
+
