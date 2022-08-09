@@ -269,5 +269,5 @@ Robot {
   physics Physics {
     density 100
   }
-  controller "my_controller"
+  controller "my_controller_cpp"
 }
