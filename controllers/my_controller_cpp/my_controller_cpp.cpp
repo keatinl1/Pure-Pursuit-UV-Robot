@@ -31,21 +31,18 @@ int main(int argc, char **argv) {
 
   // get the time step of the current world.
   int timeStep = 16 ; //(int)robot->getBasicTimeStep();
-  int next_wp_index ;
   double max_speed = 6.28 ;
   double L = 5 ;
   double x_dist[80], y_dist[80], dist[80] ;
 
-//  std::cout << mat << std::endl;
-  
-  
+
   // Motor instances
   Motor *motor_1 = robot->getMotor("motor_1");
-  motor_1->setPosition(0);
+  motor_1->setPosition(INFINITY);
   motor_1->setVelocity(0);
   
   Motor *motor_2 = robot->getMotor("motor_2");  
-  motor_2->setPosition(0);
+  motor_2->setPosition(INFINITY);
   motor_2->setVelocity(0);
   
 
@@ -61,6 +58,8 @@ int main(int argc, char **argv) {
   while (robot->step(timeStep) != -1) {
 
     // 0 - Read the sensors and reinitialise dist used in loop
+    int next_wp_index = 0;
+    
     double next_wp_dist = 100 ;
     
     const double *front_gps_value = front_gps->getValues();
@@ -68,7 +67,7 @@ int main(int argc, char **argv) {
         
     
     // 1 - Find next waypoint
-    for (int i = 0; i < 81; i++) {
+    for (int i = 0; i < 79; i++) {
       x_dist[i] =  (x_pos[i] - center_gps_value[0])*(x_pos[i] - center_gps_value[0]) ;
       y_dist[i] =  (y_pos[i] - center_gps_value[1])*(y_pos[i] - center_gps_value[1]) ;
       
@@ -82,8 +81,8 @@ int main(int argc, char **argv) {
       
       }
       
-    double next_x = x_pos[next_wp_index] ;
-    double next_y = y_pos[next_wp_index] ;    
+    double next_x = x_pos[next_wp_index + 5] ;
+    double next_y = y_pos[next_wp_index + 5] ;    
     
     
     // 2 - Find goal on lookahead circle
@@ -115,11 +114,14 @@ int main(int argc, char **argv) {
     if ((current_heading - required_heading) > 0.1) {
         while (abs(current_heading - required_heading) > 0.1) {
             robot->step(timeStep) ;
-            double left_speed = 0.25 * max_speed ;
-            double right_speed = -0.25 * max_speed ;
-    
+            const double left_speed = -0.25 * max_speed ;
+            const double right_speed = 0.25 * max_speed ;
+
             motor_1->setVelocity(left_speed);
             motor_2->setVelocity(right_speed);
+            
+            const double *front_gps_value = front_gps->getValues();
+            const double *center_gps_value = center_gps->getValues();
             
             x = goal_x - center_gps_value[0] ;
             y = goal_y - center_gps_value[1] ;
@@ -136,21 +138,59 @@ int main(int argc, char **argv) {
             if (current_heading < 0 ) {
                 current_heading = PI + (PI - abs(current_heading));
             }  
+            
+            std::cout << required_heading << std::endl;
+            std::cout << current_heading << std::endl;
+            std::cout << "A" << std::endl;
+                        
         }
-    }    
+    }
     
     
     
- 
+    else if ((required_heading - current_heading) > 0.1 ) {
+      while (abs(current_heading - required_heading) > 0.1 ){
+        robot->step(timeStep) ;
+        const double left_speed = 0.25 * max_speed ;
+        const double right_speed = -0.25 * max_speed ;  
+        
+        motor_1->setVelocity(left_speed) ;
+        motor_2->setVelocity(right_speed) ;
+        
+        const double *front_gps_value = front_gps->getValues();
+        const double *center_gps_value = center_gps->getValues();
+            
+        x = goal_x - center_gps_value[0] ;
+        y = goal_y - center_gps_value[1] ;
+        f_x = front_gps_value[0] - center_gps_value[0] ;
+        f_y = front_gps_value[1] - center_gps_value[1] ;
+        
+        required_heading = atan2(y, x) ;
+        current_heading = atan2(f_y, f_x ) ;
+            
+        if (required_heading < 0) {
+          required_heading = PI + (PI - abs(required_heading));
+        }
+            
+        if (current_heading < 0 ) {
+          current_heading = PI + (PI - abs(current_heading));
+        }
+        std::cout << required_heading << std::endl;
+        std::cout << current_heading << std::endl;
+        std::cout << "B" << std::endl;          
+        
+      }
+    }        
     
-    std::cout << required_heading << std::endl;
-    std::cout << current_heading << std::endl;
+    // 5 - Proceed forward
+    const double left_speed = 0.25 * max_speed ;
+    const double right_speed = 0.25 * max_speed ;  
+        
+    motor_1->setVelocity(left_speed) ;
+    motor_2->setVelocity(right_speed) ;
     
+    //std::cout << "forward" << std::endl;
     
-    // Process sensor data here.
-
-    // Enter here functions to send actuator commands, like:
-    //  motor->setPosition(10.0);
   
   };
 
