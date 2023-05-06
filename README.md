@@ -39,5 +39,14 @@ Then we draw a line from our current position to the next waypoint of interest. 
 Figure 3
 </p>
 
-The angle between our current position and the goal point is our desired heading, by aligning the robot with this heading and proceeding, it will progress toward the goal point. When this is done iteratively the controller can follow a set of waypoints.
+In figure 4, the desired heading is the angle between our position and the goal point it is denoted as θ, the current heading is θ + φ, the angles are defined gloablly. The heading is corrected by turning on the spot, and the robot is aligned with θ. By proceeding, it will progress toward the goal point.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/4.png">
+</p>
+<p align="center">
+Figure 4
+</p>
+
+When this is done iteratively the controller can follow a set of waypoints.
 
