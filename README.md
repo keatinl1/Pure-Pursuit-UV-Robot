@@ -29,7 +29,7 @@ We get the current position of the robot, and find which waypoint from the set i
 
 <p align="center">
   <kbd>
-    <img src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/2.png">
+    <img width=256 height=256 src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/2.png">
   </kbd>
 </p>
 <p align="center">
@@ -40,7 +40,7 @@ Then we draw a line from our current position to the next waypoint of interest. 
 
 <p align="center">
   <kbd>
-    <img src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/3.png">
+    <img width=256 height=256 src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/3.png">
   </kbd>
 </p>
 <p align="center">
@@ -51,7 +51,7 @@ In figure 4, the desired heading is the angle between our position and the goal 
 
 <p align="center">
   <kbd>
-    <img src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/4.png">
+    <img width=256 height=256 src="https://raw.githubusercontent.com/keatinl1/Pure-Pursuit-UV-Robot/main/figures/4.png">
   </kbd>
 </p>
 <p align="center">
