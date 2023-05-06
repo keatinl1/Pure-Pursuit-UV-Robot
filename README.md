@@ -14,6 +14,9 @@ Pure pursuit is a geometric controller meaning it uses geometric properties like
 
 The robot has a lookahead circle around it with a user defined radius. We also have a set of postional waypoints which we want our robot to follow.
 
+<p align="center">
+  <img width="512" height="512"  src="https://raw.githubusercontent.com/keatinl1/PID-drone/master/images/drone.gif">
+</p>
 
 
 We get the current position of the robot, and find which waypoint from the set is closest. We then set the following waypoint in the sequence as our next waypoint of interest.
