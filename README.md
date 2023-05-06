@@ -1,4 +1,4 @@
-# Autonomous-sanitising-robot
+# Pure-Pursuit-UV-Robot 
 
 Pure pursuit control of UV sanitising robot
 
