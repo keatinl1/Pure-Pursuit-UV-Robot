@@ -60,6 +60,8 @@ Figure 4
 
 When this is done iteratively the controller can follow a set of waypoints.
 
-### "Why not just find the angle between our position and the next waypoint ?"
+$~~~~~~~~~~$
+
+#### "Why not just find the angle between our position and the next waypoint?"
 
 As the distance to the next waypoint would not always be consistent our steering would also be inconsistent. Having the lookahead circle allows you to "tune" how tightly your controller corners so your robot would behave predictably.
