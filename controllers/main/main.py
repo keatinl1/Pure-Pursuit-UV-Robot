@@ -43,8 +43,6 @@ def main():
         state = StateEstimator(center_gps, front_gps)
         current_heading, gps_center = state.current_heading, state.current_gps_center
 
-        print(gps_center)
-
         # Find where we want to go based on the state estimation and the path
         tracker = PathTracker(gps_center)
         next_x_waypoint, next_y_waypoint = tracker.next_x, tracker.next_y
@@ -59,5 +57,4 @@ def main():
         right_motor.setVelocity(right_speed)
 
 if __name__ == "__main__":
-
     main()
