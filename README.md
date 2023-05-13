@@ -47,7 +47,7 @@ Then we draw a line from our closest waypoint to the next waypoint of interest. 
 Figure 3
 </p>
 
-In figure 4, the desired heading is the angle between our position and the goal point it is denoted as θ, the current heading is θ + φ (these angles are defined wrt a global coordinate system). The heading is corrected by turning on the spot, when the robot is aligned with θ we proceed and progress toward the goal point.
+In figure 4, the desired heading is the angle between our position and the goal point it is denoted as θ, the current heading is θ + φ (these angles are defined wrt a global coordinate system). The heading is corrected by adjusting the velocities of the wheels.
 
 <p align="center">
   <kbd>
@@ -64,4 +64,4 @@ $~~~~~~~~~~$
 
 #### "Why not just find the angle between our position and the next waypoint?"
 
-As the distance to the next waypoint would not always be consistent our steering would also be inconsistent. Having the lookahead circle allows you to "tune" how tightly your controller corners so your robot would behave predictably.
+As the distance to the next waypoint would not always be consistent our steering would also be inconsistent. Having the lookahead circle allows you to "tune" how tightly your controller turns so your robot would behave predictably.
