@@ -2,7 +2,7 @@
 
 Pure pursuit control of a UV sanitising robot made in WeBots, an open source robot simulator (https://cyberbotics.com/)
 
-Watch the video below and scroll further for an explaination of the algorithm :)
+Watch the video below and scroll further for an explanation of the algorithm :)
 
 ## Demo
 
@@ -36,7 +36,7 @@ We get the current position of the robot, and find which waypoint from the set i
 Figure 2
 </p>
 
-Then we draw a line from our current position to the next waypoint of interest. Wherever this line intersects our lookahead circle is our goal point see figure 3.
+Then we draw a line from our closest waypoint to the next waypoint of interest. Wherever this line intersects our lookahead circle is our goal point see figure 3.
 
 <p align="center">
   <kbd>
