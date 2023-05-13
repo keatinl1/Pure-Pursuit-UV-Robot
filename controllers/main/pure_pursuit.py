@@ -1,12 +1,11 @@
 '''Controller class'''
-
 import math
 import numpy as np
 
 class PurePursuit:
     '''Controller Class'''
     def __init__(self, curr_heading, nxt_x_wypt, nxt_y_wypt, gps_center):
-        self.lookahead_radius = 0.1
+        self.lookahead_radius = 0.5
         self.current_heading = curr_heading
         self.required_heading = 0
         self.left_velocity = 0
@@ -19,29 +18,22 @@ class PurePursuit:
     def find_goal_point(self):
         '''Find goal on lookahead circle'''
         dist_to_next = np.sqrt((self.next_x - self.gps[0])**2 + (self.next_y - self.gps[1])**2)
-
         t = self.lookahead_radius / dist_to_next
-
         goal_x, goal_y = (1 - t)*self.gps[0] + t* self.next_x, (1 - t)*self.gps[1] + t* self.next_y
-
         self.desired_heading(goal_x, goal_y)
 
     def desired_heading(self, goal_x, goal_y):
         '''find what heading we should be going'''
         x = goal_x - self.gps[0]
         y = goal_y - self.gps[1]
-
         self.required_heading = np.arctan2(y, x)
-
         if self.required_heading < 0 :
             self.required_heading = np.pi + (np.pi - abs(self.required_heading))
-
         self.calculate_wheel_velocities()
 
     def calculate_wheel_velocities(self, wheelbase=0.0, robot_width=0.5):
         '''function to calculate individual wheel vels based on headings and const vel'''
-
-        velocity = 1.57 / 2
+        velocity = 1.57 / 4
 
         # Calculate angular distance and direction
         angular_distance = self.required_heading - self.current_heading
@@ -56,6 +48,7 @@ class PurePursuit:
 
         # Calculate time and linear distance
         time = abs(angular_distance) / desired_angular_velocity
+        print(time)
         linear_distance = velocity * time
 
         # Calculate radius of curvature
