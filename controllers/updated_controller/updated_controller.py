@@ -1,147 +1,184 @@
 """my_controller controller."""
 from controller import Robot
+import math
 import pandas as pd
 import numpy as np
-import math
 
+class StateEstimator:
+    '''Return the heading from GPS data'''
+    def __init__(self, center_gps, front_gps):
+        self.center = center_gps
+        self.front = front_gps
+        self.current_heading = 0
+        self.current_gps_center = [0, 0]
+        self.current_gps_front = [0, 0]
+        self.get_gps()
 
-def getGPS():
-    gps_vals = gps.getValues()
-    gps_x = gps_vals[0]
-    gps_y = gps_vals[1]
+    def get_gps(self):
+        '''get positional data from "GPS" on robot'''
+        center_gps_vals = self.center.getValues()
+        self.current_gps_center[0] = center_gps_vals[0]
+        self.current_gps_center[1] = center_gps_vals[1]
 
-    f_gps_vals = front_gps.getValues()
-    f_gps_x = f_gps_vals[0]
-    f_gps_y = f_gps_vals[1]
+        f_gps_vals = self.front.getValues()
+        self.current_gps_front[0] = f_gps_vals[0]
+        self.current_gps_front[1] = f_gps_vals[1]
 
-    return gps_x, gps_y, f_gps_x, f_gps_y
+        self.get_current_heading(self.current_gps_center[0], self.current_gps_center[1], self.current_gps_front[0], self.current_gps_front[1])
 
+    def get_current_heading(self, center_x, center_y, front_x, front_y):
+        '''get required and current headings from gps and goal data'''
+        d_f_x = front_x - center_x
+        d_f_y = front_y - center_y
 
-def getHeadings(goal_x, goal_y, gps_x, gps_y, f_gps_x, f_gps_y):
-    x = goal_x - gps_x
-    y = goal_y - gps_y
-    f_x = f_gps_x - gps_x
-    f_y = f_gps_y - gps_y
+        self.current_heading = np.arctan2(d_f_y, d_f_x)
 
-    required_heading = np.arctan2(y, x)
-    current_heading = np.arctan2(f_y, f_x)
-    
-    if required_heading < 0 :
-        required_heading = np.pi + (np.pi - abs(required_heading))
+        if self.current_heading < 0 :
+            self.current_heading = np.pi + (np.pi - abs(self.current_heading))
 
-    if current_heading < 0 :
-        current_heading = np.pi + (np.pi - abs(current_heading))
+class PathTracker:
+    '''Find what goal waypoint should be, this assumes no obstacles'''
+    def __init__(self, gps_list):
+        self.gps_x = gps_list[0]
+        self.gps_y = gps_list[1]
+        self.next_x = 0
+        self.next_y = 0
+        waypoints = pd.read_excel('trajectory.xlsx')
+        self.wp_array = np.array(waypoints)
+        self.x_wp = self.wp_array[:, 0]
+        self.y_wp = self.wp_array[:, 1]
 
-    return required_heading, current_heading
+        self.plan()
 
+    def plan(self):
+        '''Find next waypoint'''
+        dist = ( self.x_wp - self.gps_x ) ** 2 + ( self.y_wp - self.gps_y ) ** 2
 
-def refreshGPS():
-    gps_x, gps_y, f_gps_x, f_gps_y = getGPS()
-    required_heading, current_heading = getHeadings(goal_x, goal_y, gps_x, gps_y, f_gps_x, f_gps_y)
-    return required_heading, current_heading
+        i_closest_wp = np.argmin(dist)
 
+        next_wp = self.wp_array[i_closest_wp + 1]
 
-def calculate_wheel_velocities(current_heading, desired_heading, wheelbase=1.0, robot_width=0.5):
+        self.next_x, self.next_y = next_wp[0], next_wp[1]
 
-    velocity = 1.57
+        return self.next_x, self.next_y
 
-    # Calculate angular distance and direction
-    angular_distance = desired_heading - current_heading
-    if angular_distance > math.pi:
-        angular_distance -= 2 * math.pi
-    elif angular_distance < -math.pi:
-        angular_distance += 2 * math.pi
+class PurePursuit:
+    '''Controller Class'''
+    def __init__(self, curr_heading, nxt_x_wypt, nxt_y_wypt, gps_center):
+        self.lookahead_radius = 1.0
+        self.current_heading = curr_heading
+        self.required_heading = 0
+        self.left_velocity = 0
+        self.right_velocity = 0
+        self.next_x = nxt_x_wypt
+        self.next_y = nxt_y_wypt
+        self.gps = gps_center
+        self.find_goal_point()
 
-    # Calculate desired angular velocity
-    angular_direction = 1.0 if angular_distance > 0 else -1.0
-    desired_angular_velocity = abs(angular_distance) * angular_direction
+    def find_goal_point(self):
+        '''Find goal on lookahead circle'''
+        dist_to_next = np.sqrt((self.next_x - self.gps[0])**2 + (self.next_y - self.gps[1])**2)
 
-    # Calculate time and linear distance
-    time = abs(angular_distance) / desired_angular_velocity
-    linear_distance = velocity * time
+        t = self.lookahead_radius / dist_to_next
 
-    # Calculate radius of curvature
-    radius_of_curvature = linear_distance / abs(angular_distance)
+        goal_x, goal_y = (1 - t)*self.gps[0] + t* self.next_x, (1 - t)*self.gps[1] + t* self.next_y
 
-    # Calculate left and right wheel velocities
-    left_wheel_velocity = (velocity - (desired_angular_velocity * robot_width / 2)) * (1 - (wheelbase / 2) / radius_of_curvature)
-    right_wheel_velocity = (velocity + (desired_angular_velocity * robot_width / 2)) * (1 + (wheelbase / 2) / radius_of_curvature)
+        self.desired_heading(goal_x, goal_y)
 
-    return left_wheel_velocity, right_wheel_velocity
+    def desired_heading(self, goal_x, goal_y):
+        '''find what heading we should be going'''
+        x = goal_x - self.gps[0]
+        y = goal_y - self.gps[1]
 
+        self.required_heading = np.arctan2(y, x)
 
-# Setup:
-if __name__ == "__main__":
-    
+        if self.required_heading < 0 :
+            self.required_heading = np.pi + (np.pi - abs(self.required_heading))
+
+        self.calculate_wheel_velocities()
+
+    def calculate_wheel_velocities(self, wheelbase=0.0, robot_width=0.5):
+        '''function to calculate individual wheel vels based on headings and const vel'''
+
+        velocity = 1.57
+
+        # Calculate angular distance and direction
+        angular_distance = self.required_heading - self.current_heading
+        if angular_distance > math.pi:
+            angular_distance -= 2 * math.pi
+        elif angular_distance < -math.pi:
+            angular_distance += 2 * math.pi
+
+        # Calculate desired angular velocity
+        angular_direction = 1.0 if angular_distance > 0 else -1.0
+        desired_angular_velocity = abs(angular_distance) * angular_direction
+
+        # Calculate time and linear distance
+        time = abs(angular_distance) / desired_angular_velocity
+        linear_distance = velocity * time
+
+        # Calculate radius of curvature
+        radius_of_curvature = linear_distance / abs(angular_distance)
+
+        # Calculate left and right wheel velocities
+        self.left_velocity = (velocity - (desired_angular_velocity * robot_width / 2)) * (1 - (wheelbase / 2) / radius_of_curvature)
+        self.right_velocity = (velocity + (desired_angular_velocity * robot_width / 2)) * (1 + (wheelbase / 2) / radius_of_curvature)
+
+def main():
+    '''main function for simulation'''
     # Robot instance.
     robot = Robot()
-    
+
     # Set the time step of the current world.
     timestep = 16
-    
-    max_speed = 6.28
-    
+
     # Motor instances (defining where to send motor instructions)
     left_motor = robot.getDevice('motor_2')
     left_motor.setPosition(float('inf'))
     left_motor.setVelocity(0.0)
-    
+
     right_motor = robot.getDevice('motor_1')
     right_motor.setPosition(float('inf'))
     right_motor.setVelocity(0.0)
-    
-    # LIDAR instance 
+
+    # LiDAR instance
     lidar = robot.getDevice('lidar')
     lidar.enable(timestep)
     lidar.enablePointCloud()
 
     # GPS instance
-    gps = robot.getDevice('gps')
-    gps.enable(timestep)
-    
+    center_gps = robot.getDevice('gps')
+    center_gps.enable(timestep)
+
     front_gps = robot.getDevice('front_gps')
     front_gps.enable(timestep)
 
-    waypoints = pd.read_excel('trajectory.xlsx')
-    wp = np.array(waypoints)
+    while True:
 
-    x_wp = wp[:, 0]
-    y_wp = wp[:, 1]
-    
-    L = 1.0
-    
-    
-# Main loop:
-while robot.step(timestep) != -1:
-    robot.step(timestep)
-    
-    gps_x, gps_y, f_gps_x, f_gps_y = getGPS()
-    
-        
-    # 1 - Find next waypoint
-    dist = ( x_wp - gps_x ) ** 2 + ( y_wp - gps_y ) ** 2 ;
+        # Timestep
+        robot.step(timestep)
 
-    i_closest_wp = np.argmin(dist)
-    
-    next_wp = wp[i_closest_wp + 1]
+        # Process data from GPS to get headings
+        state = StateEstimator(center_gps, front_gps)
+        current_heading, gps_center = state.current_heading, state.current_gps_center
 
-    next_x = next_wp[0]
-    next_y = next_wp[1]
-    
-    # 2 - Find goal on lookahead circle
-    dist_to_next = np.sqrt((next_x - gps_x)**2 + (next_y - gps_y)**2)
-    
-    t = L / dist_to_next
-    
-    goal_x = (1 - t)*gps_x + t* next_x
-    goal_y = (1 - t)*gps_y + t* next_y
+        print(gps_center)
 
-    # 3 - Align with required heading if not almost already
-    required_heading, current_heading = getHeadings(goal_x, goal_y, gps_x, gps_y, f_gps_x, f_gps_y)
+        # Find where we want to go based on the state estimation and the path
+        tracker = PathTracker(gps_center)
+        next_x_waypoint, next_y_waypoint = tracker.next_x, tracker.next_y
 
-    left_speed, right_speed = calculate_wheel_velocities(current_heading, required_heading)
-    
-    print(left_speed, right_speed)
-    
-    left_motor.setVelocity(left_speed)
-    right_motor.setVelocity(right_speed)
+        # print(next_x_waypoint, next_y_waypoint)
+
+        # Find control actuations based on where we want to go
+        controller = PurePursuit(current_heading,  next_x_waypoint, next_y_waypoint, gps_center)
+        left_speed = controller.left_velocity
+        right_speed = controller.right_velocity
+
+        # Send the actuation
+        left_motor.setVelocity(left_speed)
+        right_motor.setVelocity(right_speed)
+
+if __name__ == "__main__":
+
+    main()
