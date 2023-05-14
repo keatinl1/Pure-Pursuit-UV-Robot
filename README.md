@@ -47,7 +47,7 @@ Then we draw a line from our closest waypoint to the next waypoint of interest. 
 Figure 3
 </p>
 
-In figure 4, the desired heading is the angle between our position and the goal point it is denoted as θ, the current heading is θ + φ (these angles are defined wrt a global coordinate system). The heading is corrected by adjusting the velocities of the wheels.
+In figure 4, the desired heading is the angle between our position and the goal point it is denoted as θ, the current heading is θ + φ. The heading is corrected by φ radians by adjusting the velocities of the wheels.
 
 <p align="center">
   <kbd>
@@ -64,4 +64,4 @@ $~~~~~~~~~~$
 
 #### "Why not just find the angle between our position and the next waypoint?"
 
-As the distance to the next waypoint would not always be consistent our steering would also be inconsistent. Having the lookahead circle allows you to "tune" how tightly your controller turns so your robot would behave predictably.
+The goal point is used as part of the calculation for wheel velocities. As the distance to the next waypoint is not always consistent using the next waypoint instead would get inconsistent steering. Having the lookahead circle gives you a goal point a consistent distance away so you can tune how tightly your controller turns giving you a more predictable robot.
