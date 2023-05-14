@@ -6,7 +6,7 @@ Watch the video below and scroll further for an explanation of the algorithm :)
 
 ## Demo
 
-https://user-images.githubusercontent.com/87669488/236628705-70e88df3-e2e5-44bc-a3dc-9408b00b6bcc.mp4
+https://github.com/keatinl1/Pure-Pursuit-UV-Robot/assets/87669488/5ec07258-84fc-4891-957b-a74946d8a1bc
 
 $~~~~~~~~~~$
 
