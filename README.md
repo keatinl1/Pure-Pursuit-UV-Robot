@@ -64,4 +64,4 @@ $~~~~~~~~~~$
 
 #### "Why not just find the angle between our position and the next waypoint?"
 
-The goal point is used as part of the calculation for wheel velocities. As the distance to the next waypoint is not always consistent using the next waypoint instead would get inconsistent steering. Having the lookahead circle gives you a goal point a consistent distance away so you can tune how tightly your controller turns giving you a more predictable robot.
+The goal point is used as part of the calculation for wheel velocities. As the distance to the next waypoint is not always consistent using the next waypoint instead would get inconsistent steering. Having the lookahead circle gives you a goal point a consistent distance away so you can tune how tightly your controller turns, giving you a more predictable robot.
