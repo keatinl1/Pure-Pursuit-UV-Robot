@@ -1,6 +1,7 @@
 """my_controller controller."""
-from controller import Robot
+import pandas as pd
 
+from controller import Robot
 from state_estimate import StateEstimator
 from path_track import PathTracker
 from pure_pursuit import PurePursuit
@@ -12,6 +13,9 @@ def main():
 
     # Set the time step of the current world.
     timestep = 16
+    
+    # import waypoints    
+    waypoints = pd.read_excel('trajectory.xlsx')
 
     # Motor instances (defining where to send motor instructions)
     left_motor = robot.getDevice('motor_2')
@@ -44,15 +48,15 @@ def main():
         current_heading, gps_center = state.current_heading, state.current_gps_center
 
         # Find where we want to go based on the state estimation and the path
-        tracker = PathTracker(gps_center)
-        next_x_waypoint, next_y_waypoint = tracker.next_x, tracker.next_y
+        path_tracker = PathTracker(waypoints, gps_center)
+        next_x_waypoint, next_y_waypoint = path_tracker.get_next_waypoint()
 
         # Find control actuations based on where we want to go
         controller = PurePursuit(current_heading,  next_x_waypoint, next_y_waypoint, gps_center)
         left_speed = controller.left_velocity
         right_speed = controller.right_velocity
 
-        # Send the actuation
+        # Perform actuation
         left_motor.setVelocity(left_speed)
         right_motor.setVelocity(right_speed)
 
