@@ -13,9 +13,12 @@ def main():
 
     # Set the time step of the current world.
     timestep = 16
-    
+
     # import waypoints    
     waypoints = pd.read_excel('trajectory.xlsx')
+    wp_array = waypoints.to_numpy()
+    last_x_wp = wp_array[-1, 0]
+    last_y_wp = wp_array[-1, 1]
 
     # Motor instances (defining where to send motor instructions)
     left_motor = robot.getDevice('motor_2')
@@ -48,8 +51,8 @@ def main():
         current_heading, gps_center = state.current_heading, state.current_gps_center
 
         # Find where we want to go based on the state estimation and the path
-        path_tracker = PathTracker(waypoints, gps_center)
-        next_x_waypoint, next_y_waypoint = path_tracker.get_next_waypoint()
+        path_tracker = PathTracker(wp_array, gps_center)
+        next_x_waypoint, next_y_waypoint = path_tracker.get_next_waypoint(wp_array)
 
         # Find control actuations based on where we want to go
         controller = PurePursuit(current_heading,  next_x_waypoint, next_y_waypoint, gps_center)
@@ -59,6 +62,14 @@ def main():
         # Perform actuation
         left_motor.setVelocity(left_speed)
         right_motor.setVelocity(right_speed)
+
+        dist = (((gps_center[0] - last_x_wp) ** 2 + (gps_center[1] - last_y_wp) ** 2) ** 0.5)
+        # print(dist)
+
+        if dist < 0.9:
+            left_motor.setVelocity(0)
+            right_motor.setVelocity(0)
+            break
 
 if __name__ == "__main__":
     main()
